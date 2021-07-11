@@ -16,6 +16,13 @@ class PlaylistViewController: UIViewController {
     private var playlistDesc: UILabel!
     private var playButton: UIButton!
     
+    // vertical constraint
+    private var coverTopPadding: CGFloat!
+    private var titleTopPadding: CGFloat!
+    private var descTopPadding: CGFloat!
+    private var playButtonTopPadding: CGFloat!
+    private var verticalConstraint: [NSLayoutConstraint]!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -27,6 +34,13 @@ class PlaylistViewController: UIViewController {
         setUpViews()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        // animate in if necessary
+        animateViewsIn()
+    }
+    
     // set up views
     func setUpViews() {
         // blobs
@@ -34,8 +48,8 @@ class PlaylistViewController: UIViewController {
             let blob = UIImageView(frame: .zero)
             blob.translatesAutoresizingMaskIntoConstraints = false
             blob.image = UIImage(named: "blob")
-            blob.alpha = CGFloat.random(in: 0.4...0.6)
             blob.transform = CGAffineTransform(rotationAngle: CGFloat.random(in: 1...360) * 180.0/CGFloat.pi)
+            blob.alpha = 0.0
             view.addSubview(blob)
             
             blobs.append(blob)
@@ -45,6 +59,7 @@ class PlaylistViewController: UIViewController {
         playlistCover = UIImageView(frame: .zero)
         playlistCover.translatesAutoresizingMaskIntoConstraints = false
         playlistCover.image = UIImage(named: "playlist_cover")
+        playlistCover.alpha = 0.0
         view.addSubview(playlistCover)
         
         // playlist title
@@ -55,6 +70,7 @@ class PlaylistViewController: UIViewController {
         playlistTitle.textAlignment = .center
         let playlistTitleSize = view.frame.size.height * 0.033
         playlistTitle.font = UIFont.systemFont(ofSize: playlistTitleSize, weight: .bold)
+        playlistTitle.alpha = 0.0
         view.addSubview(playlistTitle)
         
         // playlist desc
@@ -67,6 +83,7 @@ class PlaylistViewController: UIViewController {
         playlistDesc.textAlignment = .center
         let playlistDescSize = view.frame.size.height * 0.019
         playlistDesc.font = UIFont.systemFont(ofSize: playlistDescSize, weight: .regular)
+        playlistDesc.alpha = 0.0
         view.addSubview(playlistDesc)
         
         // play button
@@ -74,6 +91,7 @@ class PlaylistViewController: UIViewController {
         playButton.translatesAutoresizingMaskIntoConstraints = false
         playButton.setBackgroundImage(UIImage(named: "play_button"), for: .normal)
         playButton.addTarget(self, action: #selector(play), for: .touchUpInside)
+        playButton.alpha = 0.0
         view.addSubview(playButton)
         
         // set up the constraints
@@ -113,11 +131,11 @@ class PlaylistViewController: UIViewController {
         ])
         
         // y positions
-        let coverTopPadding = view.frame.size.height * 0.15
-        let titleTopPadding = view.frame.size.height * 0.03
-        let descTopPadding = view.frame.size.height * 0.02
-        let playButtonTopPadding = view.frame.size.height * 0.15
-        view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-(coverTop)-[cover]-(titleTop)-[title]-(descTop)-[desc]-(playTop)-[play]", options: [], metrics: ["coverTop": coverTopPadding, "titleTop": titleTopPadding, "descTop": descTopPadding, "playTop": playButtonTopPadding], views: ["play": playButton!, "desc": playlistDesc!, "title": playlistTitle!, "cover": playlistCover!]))
+        coverTopPadding = view.frame.size.height * 0.15 + 10.0
+        titleTopPadding = view.frame.size.height * 0.03
+        descTopPadding = view.frame.size.height * 0.02
+        playButtonTopPadding = view.frame.size.height * 0.15 - 10.0
+        setVerticalConstraint()
         
         view.layoutSubviews()
         
@@ -125,10 +143,82 @@ class PlaylistViewController: UIViewController {
         
     }
     
+    func setVerticalConstraint() {
+        if let _ = verticalConstraint {
+            view.removeConstraints(verticalConstraint)
+        }
+        
+        verticalConstraint = NSLayoutConstraint.constraints(withVisualFormat: "V:|-(coverTop)-[cover]-(titleTop)-[title]-(descTop)-[desc]-(playTop)-[play]", options: [], metrics: ["coverTop": coverTopPadding!, "titleTop": titleTopPadding!, "descTop": descTopPadding!, "playTop": playButtonTopPadding!], views: ["play": playButton!, "desc": playlistDesc!, "title": playlistTitle!, "cover": playlistCover!])
+        view.addConstraints(verticalConstraint)
+    }
+    
     func animateViewsIn() {
-        // rotate blob
-        for (i, blob) in blobs.enumerated() {
-            rotateBlob(i: i, blob: blob)
+        if playlistCover.alpha == 0.0 {
+            // rotate blob
+            for (i, blob) in blobs.enumerated() {
+                rotateBlob(i: i, blob: blob)
+            }
+            
+            // fade in avatar and titles
+            coverTopPadding -= 10.0
+            playButtonTopPadding += 10.0
+            setVerticalConstraint()
+            
+            UIView.animate(withDuration: 0.5, delay: 1.0) {
+                self.playlistCover.alpha = 1.0
+                self.playlistTitle.alpha = 1.0
+                self.playlistDesc.alpha = 1.0
+                
+                for blob in self.blobs {
+                    blob.alpha = CGFloat.random(in: 0.4...0.6)
+                }
+                
+                self.view.layoutIfNeeded()
+            } completion: { _ in
+                self.playButton.transform = CGAffineTransform(scaleX: 0.0, y: 0.0)
+                self.playButton.alpha = 1.0
+                
+                UIView.animate(withDuration: 0.25, delay: 0.0, options: .curveEaseInOut) {
+                    self.playButton.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
+                } completion: { _ in
+                    UIView.animate(withDuration: 0.05, delay: 0.0, options: .curveEaseInOut) {
+                        self.playButton.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+                    }
+                }
+            }
+        }
+    }
+    
+    func animateViewsOut(completionHandler: @escaping () -> Void) {
+        // fade in avatar and titles
+        coverTopPadding += 10.0
+        playButtonTopPadding -= 10.0
+        setVerticalConstraint()
+        
+        UIView.animate(withDuration: 0.5) {
+            self.playlistCover.alpha = 0.0
+            self.playlistTitle.alpha = 0.0
+            self.playlistDesc.alpha = 0.0
+            
+            self.view.layoutIfNeeded()
+        } completion: { _ in
+            UIView.animate(withDuration: 0.05, delay: 0.0, options: .curveEaseInOut) {
+                self.playButton.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
+            } completion: { _ in
+                UIView.animate(withDuration: 0.25, delay: 0.0, options: .curveEaseInOut) {
+                    self.playButton.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
+                } completion: { _ in
+                    self.playButton.alpha = 0.0
+                    
+                    UIView.animate(withDuration: 0.5) {
+                        for blob in self.blobs {
+                            blob.alpha = 0.0
+                        }
+                    } completion: { _ in
+                        completionHandler()
+                    }
+                }
+            }
         }
     }
     
@@ -150,7 +240,9 @@ class PlaylistViewController: UIViewController {
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         
         // go to project vc
-        navigationController?.pushViewController(ProjectViewController(), animated: false)
+        animateViewsOut {
+            self.navigationController?.pushViewController(ProjectViewController(), animated: false)
+        }
     }
 }
 

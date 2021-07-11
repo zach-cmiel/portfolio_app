@@ -21,6 +21,16 @@ class ProjectViewController: UIViewController {
     private var nextButton: UIButton!
     private var backButton: UIButton!
     
+    // vertical constraint
+    private var playlistTitlePadding: CGFloat!
+    private var albumTopPadding: CGFloat!
+    private var songPadding: CGFloat!
+    private var descPadding: CGFloat!
+    private var progressPadding: CGFloat!
+    private var controlsPadding: CGFloat!
+    private var datePadding: CGFloat!
+    private var verticalConstraint: [NSLayoutConstraint]!
+    
     // view model
     var viewModel: ProjectViewModel = ProjectViewModel()
     
@@ -45,6 +55,7 @@ class ProjectViewController: UIViewController {
         playlistTitle.textAlignment = .center
         let playlistTitleSize = view.frame.size.height * 0.018
         playlistTitle.font = UIFont.systemFont(ofSize: playlistTitleSize, weight: .regular)
+        playlistTitle.alpha = 0.0
         view.addSubview(playlistTitle)
         
         // collection view layout
@@ -65,6 +76,7 @@ class ProjectViewController: UIViewController {
         albumCovers.showsHorizontalScrollIndicator = false
         albumCovers.showsVerticalScrollIndicator = false
         albumCovers.register(AlbumCollectionViewCell.self, forCellWithReuseIdentifier: "cover")
+        albumCovers.alpha = 0.0
         view.addSubview(albumCovers)
         
         // song title
@@ -74,6 +86,7 @@ class ProjectViewController: UIViewController {
         songTitle.textColor = UIColor(named: "LabelTextColor")
         let songLabelSize = view.frame.size.height * 0.025
         songTitle.font = UIFont.systemFont(ofSize: songLabelSize, weight: .bold)
+        songTitle.alpha = 0.0
         view.addSubview(songTitle)
         
         // song desc
@@ -82,12 +95,14 @@ class ProjectViewController: UIViewController {
         songDesc.text = self.viewModel.getProjectDesc(i: 0)
         songDesc.textColor = UIColor(named: "LabelTextColor")
         songDesc.font = UIFont.systemFont(ofSize: songLabelSize, weight: .regular)
+        songDesc.alpha = 0.0
         view.addSubview(songDesc)
         
         // progress bar (update corner radius after constraints
         progressBar = UIView(frame: .zero)
         progressBar.translatesAutoresizingMaskIntoConstraints = false
         progressBar.backgroundColor = UIColor(named: "LabelTextColor")
+        progressBar.alpha = 0.0
         view.addSubview(progressBar)
         
         // start date
@@ -98,6 +113,7 @@ class ProjectViewController: UIViewController {
         startDate.textAlignment = .left
         let dateSize = view.frame.size.height * 0.017
         startDate.font = UIFont.systemFont(ofSize: dateSize, weight: .regular)
+        startDate.alpha = 0.0
         view.addSubview(startDate)
         
         // end date
@@ -107,6 +123,7 @@ class ProjectViewController: UIViewController {
         endDate.textColor = UIColor(named: "LabelTextColor")
         endDate.textAlignment = .right
         endDate.font = UIFont.systemFont(ofSize: dateSize, weight: .regular)
+        endDate.alpha = 0.0
         view.addSubview(endDate)
         
         // back button (goes back to first vc)
@@ -114,6 +131,7 @@ class ProjectViewController: UIViewController {
         backButton.translatesAutoresizingMaskIntoConstraints = false
         backButton.setBackgroundImage(UIImage(named: "playlist_cover"), for: .normal)
         backButton.addTarget(self, action: #selector(back), for: .touchUpInside)
+        backButton.alpha = 0.0
         view.addSubview(backButton)
         
         // previous button
@@ -122,6 +140,7 @@ class ProjectViewController: UIViewController {
         previousButton.setBackgroundImage(UIImage(named: "previous_button")?.withRenderingMode(.alwaysTemplate), for: .normal)
         previousButton.tintColor = UIColor(named: "LabelTextColor")
         previousButton.addTarget(self, action: #selector(previousProject), for: .touchUpInside)
+        previousButton.alpha = 0.0
         view.addSubview(previousButton)
         
         // next button
@@ -130,6 +149,7 @@ class ProjectViewController: UIViewController {
         nextButton.setBackgroundImage(UIImage(named: "next_button")?.withRenderingMode(.alwaysTemplate), for: .normal)
         nextButton.tintColor = UIColor(named: "LabelTextColor")
         nextButton.addTarget(self, action: #selector(nextProject), for: .touchUpInside)
+        nextButton.alpha = 0.0
         view.addSubview(nextButton)
         
         // set up constraints
@@ -172,13 +192,14 @@ class ProjectViewController: UIViewController {
         ])
         
         // rest of the y positions
-        let playlistTitlePadding = view.frame.size.height * 0.049125 + 44.0
-        let albumTopPadding = view.frame.size.height * 0.05125
-        let songPadding = view.frame.size.height * 0.0274107
-        let descPadding = view.frame.size.height * 0.00874107
-        let progressAndControlsPadding = view.frame.size.height * 0.0332143
-        let datePadding = view.frame.size.height * 0.00892857
-        view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-(titlePad)-[title]-(coverPad)-[covers]-(songPad)-[songTitle]-(descPad)-[songDesc]-(progControl)-[bar]-(datePad)-[date]-(progControl)-[back]", options: [], metrics: ["titlePad": playlistTitlePadding, "coverPad": albumTopPadding, "songPad": songPadding, "descPad": descPadding, "progControl": progressAndControlsPadding, "datePad": datePadding], views: ["title": playlistTitle!, "covers": albumCovers!, "songTitle": songTitle!, "songDesc": songDesc!, "bar": progressBar!, "date": startDate!, "back": backButton!]))
+        playlistTitlePadding = view.frame.size.height * 0.049125 + 44.0
+        albumTopPadding = view.frame.size.height * 0.05125
+        songPadding = view.frame.size.height * 0.0274107
+        descPadding = view.frame.size.height * 0.00874107
+        progressPadding = view.frame.size.height * 0.0332143
+        datePadding = view.frame.size.height * 0.00892857
+        controlsPadding = view.frame.size.height * 0.0332143
+        setVerticalConstraint()
         
         // controls x
         let controlsPadding = view.frame.size.width * 0.083
@@ -187,10 +208,96 @@ class ProjectViewController: UIViewController {
         // update layout and then add corner radius to progress bar
         view.layoutIfNeeded()
         progressBar.layer.cornerRadius = progressBar.frame.size.height * 0.5
+        
+        view.layoutSubviews()
+        
+        animateViewsIn()
+    }
+    
+    func setVerticalConstraint() {
+        if let _ = verticalConstraint {
+            view.removeConstraints(verticalConstraint)
+        }
+        
+        verticalConstraint = NSLayoutConstraint.constraints(withVisualFormat: "V:|-(titlePad)-[title]-(coverPad)-[covers]-(songPad)-[songTitle]-(descPad)-[songDesc]-(progControl)-[bar]-(datePad)-[date]-(controlPad)-[back]", options: [], metrics: ["titlePad": playlistTitlePadding!, "coverPad": albumTopPadding!, "songPad": songPadding!, "descPad": descPadding!, "progControl": progressPadding!, "datePad": datePadding!, "controlPad": controlsPadding!], views: ["title": playlistTitle!, "covers": albumCovers!, "songTitle": songTitle!, "songDesc": songDesc!, "bar": progressBar!, "date": startDate!, "back": backButton!])
+        view.addConstraints(verticalConstraint)
     }
     
     func animateViewsIn() {
+        // fade in avatar and titles
+        playlistTitlePadding -= 10.0
+        controlsPadding += 10.0
+        setVerticalConstraint()
         
+        UIView.animate(withDuration: 0.5, delay: 1.0) {
+            self.playlistTitle.alpha = 1.0
+            self.albumCovers.alpha = 1.0
+            self.songTitle.alpha = 1.0
+            self.songDesc.alpha = 1.0
+            self.progressBar.alpha = 1.0
+            self.startDate.alpha = 1.0
+            self.endDate.alpha = 1.0
+            
+            self.view.layoutIfNeeded()
+        } completion: { _ in
+            self.previousButton.transform = CGAffineTransform(scaleX: 0.0, y: 0.0)
+            self.previousButton.alpha = 1.0
+            
+            self.nextButton.transform = CGAffineTransform(scaleX: 0.0, y: 0.0)
+            self.nextButton.alpha = 1.0
+            
+            self.backButton.transform = CGAffineTransform(scaleX: 0.0, y: 0.0)
+            self.backButton.alpha = 1.0
+            
+            UIView.animate(withDuration: 0.25, delay: 0.0, options: .curveEaseInOut) {
+                self.previousButton.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
+                self.nextButton.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
+                self.backButton.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
+            } completion: { _ in
+                UIView.animate(withDuration: 0.05, delay: 0.0, options: .curveEaseInOut) {
+                    self.previousButton.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+                    self.nextButton.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+                    self.backButton.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+                }
+            }
+        }
+    }
+    
+    func animateViewsOut(completionHandler: @escaping () -> Void) {
+        // fade in avatar and titles
+        playlistTitlePadding += 10.0
+        controlsPadding -= 10.0
+        setVerticalConstraint()
+        
+        UIView.animate(withDuration: 0.5) {
+            self.playlistTitle.alpha = 0.0
+            self.albumCovers.alpha = 0.0
+            self.songTitle.alpha = 0.0
+            self.songDesc.alpha = 0.0
+            self.progressBar.alpha = 0.0
+            self.startDate.alpha = 0.0
+            self.endDate.alpha = 0.0
+            
+            self.view.layoutIfNeeded()
+        } completion: { _ in            
+            UIView.animate(withDuration: 0.05, delay: 0.0, options: .curveEaseInOut) {
+                self.previousButton.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
+                self.nextButton.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
+                self.backButton.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
+            } completion: { _ in
+                UIView.animate(withDuration: 0.25, delay: 0.0, options: .curveEaseInOut) {
+                    self.previousButton.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
+                    self.nextButton.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
+                    self.backButton.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
+                } completion: { _ in
+                    self.previousButton.alpha = 0.0
+                    self.nextButton.alpha = 0.0
+                    self.backButton.alpha = 0.0
+                    
+                    completionHandler()
+                }
+            }
+        }
     }
     
     func updateTitles(i: Int) {
@@ -204,7 +311,9 @@ class ProjectViewController: UIViewController {
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         
         // pop to playlist vc
-        navigationController?.popToRootViewController(animated: false)
+        animateViewsOut {
+            self.navigationController?.popToRootViewController(animated: false)
+        }
     }
     
     @objc func previousProject() {
