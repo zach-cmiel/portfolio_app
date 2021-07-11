@@ -15,12 +15,14 @@ extension ProjectViewController: UICollectionViewDelegate, UICollectionViewDataS
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cover", for: indexPath) as! AlbumCollectionViewCell
         
-        cell.buildAlbumCover(image: UIImage(named: "playlist_cover")!)
+        cell.buildAlbumCover(image: self.viewModel.getProjectImage(i: indexPath.item))
         
         return cell
     }
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        
         let currentIndex = getCurrentCell()
         updateTitles(i: currentIndex.item)
     }

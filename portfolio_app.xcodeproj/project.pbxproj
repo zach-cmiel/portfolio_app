@@ -110,7 +110,7 @@
 				83A3A28A2697AE170060B6DF /* PlaylistViewController.swift */,
 				83A3A2B62698E95C0060B6DF /* ProjectViewController.swift */,
 				83A3A2B8269963B10060B6DF /* ProjectViewController+Extensions.swift */,
-				83A3A2BD269ABB2F0060B6DF /* ProjectViewModel.swift */,
+				83A3A2BF269B8C1E0060B6DF /* ViewModels */,
 				83A3A2BA26996E1C0060B6DF /* Views */,
 				83A3A28F2697AE180060B6DF /* Assets.xcassets */,
 				83A3A2912697AE180060B6DF /* LaunchScreen.storyboard */,
@@ -143,6 +143,14 @@
 				83A3A2BB26996E2E0060B6DF /* AlbumCollectionViewCell.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		83A3A2BF269B8C1E0060B6DF /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				83A3A2BD269ABB2F0060B6DF /* ProjectViewModel.swift */,
+			);
+			path = ViewModels;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

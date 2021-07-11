@@ -71,7 +71,7 @@ class ProjectViewController: UIViewController {
         songTitle = UILabel(frame: .zero)
         songTitle.translatesAutoresizingMaskIntoConstraints = false
         songTitle.text = self.viewModel.getProjectName(i: 0)
-        songTitle.textColor = .label
+        songTitle.textColor = UIColor(named: "LabelTextColor")
         let songLabelSize = view.frame.size.height * 0.025
         songTitle.font = UIFont.systemFont(ofSize: songLabelSize, weight: .bold)
         view.addSubview(songTitle)
@@ -80,21 +80,21 @@ class ProjectViewController: UIViewController {
         songDesc = UILabel(frame: .zero)
         songDesc.translatesAutoresizingMaskIntoConstraints = false
         songDesc.text = self.viewModel.getProjectDesc(i: 0)
-        songDesc.textColor = .label
+        songDesc.textColor = UIColor(named: "LabelTextColor")
         songDesc.font = UIFont.systemFont(ofSize: songLabelSize, weight: .regular)
         view.addSubview(songDesc)
         
         // progress bar (update corner radius after constraints
         progressBar = UIView(frame: .zero)
         progressBar.translatesAutoresizingMaskIntoConstraints = false
-        progressBar.backgroundColor = .label
+        progressBar.backgroundColor = UIColor(named: "LabelTextColor")
         view.addSubview(progressBar)
         
         // start date
         startDate = UILabel(frame: .zero)
         startDate.translatesAutoresizingMaskIntoConstraints = false
         startDate.text = self.viewModel.getStartDates(i: 0)
-        startDate.textColor = .label
+        startDate.textColor = UIColor(named: "LabelTextColor")
         startDate.textAlignment = .left
         let dateSize = view.frame.size.height * 0.017
         startDate.font = UIFont.systemFont(ofSize: dateSize, weight: .regular)
@@ -104,7 +104,7 @@ class ProjectViewController: UIViewController {
         endDate = UILabel(frame: .zero)
         endDate.translatesAutoresizingMaskIntoConstraints = false
         endDate.text = self.viewModel.getEndDates(i: 0)
-        endDate.textColor = .label
+        endDate.textColor = UIColor(named: "LabelTextColor")
         endDate.textAlignment = .right
         endDate.font = UIFont.systemFont(ofSize: dateSize, weight: .regular)
         view.addSubview(endDate)
@@ -119,14 +119,16 @@ class ProjectViewController: UIViewController {
         // previous button
         previousButton = UIButton(frame: .zero)
         previousButton.translatesAutoresizingMaskIntoConstraints = false
-        previousButton.setBackgroundImage(UIImage(named: "previous_button"), for: .normal)
+        previousButton.setBackgroundImage(UIImage(named: "previous_button")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        previousButton.tintColor = UIColor(named: "LabelTextColor")
         previousButton.addTarget(self, action: #selector(previousProject), for: .touchUpInside)
         view.addSubview(previousButton)
         
         // next button
         nextButton = UIButton(frame: .zero)
         nextButton.translatesAutoresizingMaskIntoConstraints = false
-        nextButton.setBackgroundImage(UIImage(named: "next_button"), for: .normal)
+        nextButton.setBackgroundImage(UIImage(named: "next_button")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        nextButton.tintColor = UIColor(named: "LabelTextColor")
         nextButton.addTarget(self, action: #selector(nextProject), for: .touchUpInside)
         view.addSubview(nextButton)
         
@@ -145,7 +147,7 @@ class ProjectViewController: UIViewController {
         
         NSLayoutConstraint.activate([
             albumCovers.widthAnchor.constraint(equalTo: view.widthAnchor),
-            albumCovers.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.56),
+            albumCovers.heightAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.88405797),
             progressBar.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.88405797),
             progressBar.heightAnchor.constraint(equalToConstant: 5)
         ])
@@ -170,11 +172,13 @@ class ProjectViewController: UIViewController {
         ])
         
         // rest of the y positions
-        let playlistTitlePadding = view.frame.size.height * 0.0258125
-        let descPadding = view.frame.size.height * 0.01674107
+        let playlistTitlePadding = view.frame.size.height * 0.049125 + 44.0
+        let albumTopPadding = view.frame.size.height * 0.05125
+        let songPadding = view.frame.size.height * 0.0274107
+        let descPadding = view.frame.size.height * 0.00874107
         let progressAndControlsPadding = view.frame.size.height * 0.0332143
         let datePadding = view.frame.size.height * 0.00892857
-        view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-(titlePad)-[title]-(descPad)-[covers]-(descPad)-[songTitle]-(descPad)-[songDesc]-(progControl)-[bar]-(datePad)-[date]-(progControl)-[back]", options: [], metrics: ["titlePad": playlistTitlePadding, "descPad": descPadding, "progControl": progressAndControlsPadding, "datePad": datePadding], views: ["title": playlistTitle!, "covers": albumCovers!, "songTitle": songTitle!, "songDesc": songDesc!, "bar": progressBar!, "date": startDate!, "back": backButton!]))
+        view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-(titlePad)-[title]-(coverPad)-[covers]-(songPad)-[songTitle]-(descPad)-[songDesc]-(progControl)-[bar]-(datePad)-[date]-(progControl)-[back]", options: [], metrics: ["titlePad": playlistTitlePadding, "coverPad": albumTopPadding, "songPad": songPadding, "descPad": descPadding, "progControl": progressAndControlsPadding, "datePad": datePadding], views: ["title": playlistTitle!, "covers": albumCovers!, "songTitle": songTitle!, "songDesc": songDesc!, "bar": progressBar!, "date": startDate!, "back": backButton!]))
         
         // controls x
         let controlsPadding = view.frame.size.width * 0.083
@@ -198,15 +202,18 @@ class ProjectViewController: UIViewController {
     
     @objc func back() {
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        
+        // pop to playlist vc
+        navigationController?.popToRootViewController(animated: false)
     }
     
     @objc func previousProject() {
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        
         // go to current cell - 1
         let currentCell = getCurrentCell()
         
         if currentCell.item > 0 {
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            
             let previousCell = IndexPath(item: currentCell.item - 1, section: currentCell.section)
             self.albumCovers.scrollToItem(at: previousCell, at: .centeredHorizontally, animated: true)
             
@@ -215,12 +222,12 @@ class ProjectViewController: UIViewController {
     }
     
     @objc func nextProject() {
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        
         // go to current cell + 1
         let currentCell = getCurrentCell()
         
         if currentCell.item < self.viewModel.getProjectCount() - 1 {
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            
             let nextCell = IndexPath(item: currentCell.item + 1, section: currentCell.section)
             self.albumCovers.scrollToItem(at: nextCell, at: .centeredHorizontally, animated: true)
             

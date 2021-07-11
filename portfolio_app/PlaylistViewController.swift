@@ -51,7 +51,7 @@ class PlaylistViewController: UIViewController {
         playlistTitle = UILabel(frame: .zero)
         playlistTitle.translatesAutoresizingMaskIntoConstraints = false
         playlistTitle.text = "My Portfolio"
-        playlistTitle.textColor = .label
+        playlistTitle.textColor = UIColor(named: "LabelTextColor")
         playlistTitle.textAlignment = .center
         let playlistTitleSize = view.frame.size.height * 0.033
         playlistTitle.font = UIFont.systemFont(ofSize: playlistTitleSize, weight: .bold)
@@ -63,7 +63,7 @@ class PlaylistViewController: UIViewController {
         playlistDesc.text = "a playlist of my projects"
         playlistDesc.numberOfLines = 0
         playlistDesc.lineBreakMode = .byWordWrapping
-        playlistDesc.textColor = .label
+        playlistDesc.textColor = UIColor(named: "LabelTextColor")
         playlistDesc.textAlignment = .center
         let playlistDescSize = view.frame.size.height * 0.019
         playlistDesc.font = UIFont.systemFont(ofSize: playlistDescSize, weight: .regular)

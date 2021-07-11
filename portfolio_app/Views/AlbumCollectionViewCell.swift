@@ -34,14 +34,14 @@ class AlbumCollectionViewCell: UICollectionViewCell {
         addSubview(albumCoverView)
         
         // constraints
-        let horizPadding = frame.size.width * 0.057971015
-        addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-(<=padding)-[image]-(<=padding)-|",
+        let padding = frame.size.width * 0.057971015
+        addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-(padding)-[image]-(padding)-|",
                                                       options: [],
-                                                      metrics: ["padding": horizPadding],
+                                                      metrics: ["padding": padding],
                                                       views: ["image": albumCoverView!]))
         addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-0-[image]-0-|",
                                                       options: [],
-                                                      metrics: nil,
+                                                      metrics: ["padding": padding],
                                                       views: ["image": albumCoverView!]))
     }
 }
