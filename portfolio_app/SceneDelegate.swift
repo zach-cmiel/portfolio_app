@@ -20,6 +20,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         let playlistVC = PlaylistViewController()
         let nav = UINavigationController(rootViewController: playlistVC)
+        nav.view.backgroundColor = .systemBackground
         nav.isNavigationBarHidden = true
         window.rootViewController = nav
         
