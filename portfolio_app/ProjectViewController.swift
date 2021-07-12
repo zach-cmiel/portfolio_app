@@ -31,6 +31,9 @@ class ProjectViewController: UIViewController {
     private var datePadding: CGFloat!
     private var verticalConstraint: [NSLayoutConstraint]!
     
+    // previous current index
+    var currentIndex = 0
+    
     // view model
     var viewModel: ProjectViewModel = ProjectViewModel()
     
@@ -301,6 +304,8 @@ class ProjectViewController: UIViewController {
     }
     
     func updateTitles(i: Int) {
+        self.currentIndex = i
+        
         songTitle.text = self.viewModel.getProjectName(i: i)
         songDesc.text = self.viewModel.getProjectDesc(i: i)
         startDate.text = self.viewModel.getStartDates(i: i)
@@ -325,7 +330,7 @@ class ProjectViewController: UIViewController {
             
             let previousCell = IndexPath(item: currentCell.item - 1, section: currentCell.section)
             self.albumCovers.scrollToItem(at: previousCell, at: .centeredHorizontally, animated: true)
-            
+                        
             updateTitles(i: previousCell.item)
         }
     }
