@@ -16,4 +16,4 @@ the files. I recognize this may have been overkill for such a simple app, but it
 simplicity, I combined the models (arrays) with the view model.
 
 ## Download
-To download, use this Testflight link or download the source code. Enjoy!
+To download, use this Testflight link [https://testflight.apple.com/join/5u7Yg6Bp] or download the source code. Enjoy!
